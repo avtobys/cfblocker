@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+IPS_FILE=$1
+CFUSER=$2
+CFTOKEN=$3
+
+while read ip; do
+    curl -s -X POST "https://api.cloudflare.com/client/v4/user/firewall/access_rules/rules" \
+    -H "X-Auth-Email: $CFUSER" \
+    -H "X-Auth-Key: $CFTOKEN" \
+    -H "Content-Type: application/json" \
+    --data "{\"mode\":\"block\",\"configuration\":{\"target\":\"ip\",\"value\":\"$ip\"},\"notes\":\"CfBlocker\"}"
+    sleep 1;
+done < IPS_FILE
