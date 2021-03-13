@@ -11,4 +11,4 @@ while read ip; do
     -H "Content-Type: application/json" \
     --data "{\"mode\":\"block\",\"configuration\":{\"target\":\"ip\",\"value\":\"$ip\"},\"notes\":\"CfBlocker\"}"
     sleep 1;
-done < IPS_FILE
+done < $IPS_FILE
