@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+NUM_RULES=$1
+CFUSER=$2
+CFTOKEN=$3
+
+
+
+for((i=0;i<$NUM_RULES;i++)); do
+    rule=$(curl -s -X GET "https://api.cloudflare.com/client/v4/user/firewall/access_rules/rules?mode=block&configuration_target=ip&notes=CfBlocker&page=1&per_page=1" -H "X-Auth-Email: $CFUSER" -H "X-Auth-Key: $CFTOKEN" -H "Content-Type: application/json")
+    id_rule=$(echo $rule | tr -d '\n' | cut -d'"' -f6)
+    ip=$(echo $rule | tr -d '\n' | cut -d'"' -f40)
+    scope_id=$(echo $rule | tr -d '\n' | cut -d'"' -f46)
+
+    
+    curl -X PATCH -H "X-Auth-Email: $CFUSER" \
+    -H "X-Auth-Key: $CFTOKEN" \
+    -H "Content-Type: application/json" \
+    --data "{\"id\":\"$id_rule\",\"notes\":\"CfBlocker\",\"allowed_modes\":[\"whitelist\",\"block\",\"challenge\",\"js_challenge\"],\"mode\":\"js_challenge\",\"configuration\":{\"target\":\"ip\",\"value\":\"$ip\"},\"scope\":{\"id\":\"$scope_id\",\"email\":\"$CFUSER\",\"type\":\"user\"}}" \
+    "https://api.cloudflare.com/client/v4/user/firewall/access_rules/rules/$id_rule"
+done
